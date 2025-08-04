@@ -1,4 +1,5 @@
 python-dotenv
+together
 streamlit
 google-cloud-texttospeech
 requests
