@@ -193,14 +193,18 @@ if "original_audio_bytes" in st.session_state:
             st.session_state["received_audio_bytes"] = transmitted_audio_bytes
             st.session_state["transmission_params"] = {"noise_level": noise_level, "packet_loss": packet_loss}
             st.audio(transmitted_audio_bytes, format="audio/wav")
-            
+
+# 4. Waveform Analysis
+st.subheader("4. Waveform Analysis")
+if "received_audio_bytes" in st.session_state:
+    if st.button("📊 Generate Waveform Analysis"):
+        with st.spinner("Generating waveform analysis..."):
             # Display waveform analysis
-            st.subheader("📊 Waveform Analysis")
             fig = plot_waveform_with_analysis(
                 st.session_state["original_audio_bytes"],
-                transmitted_audio_bytes,
-                noise_level,
-                packet_loss
+                st.session_state["received_audio_bytes"],
+                st.session_state["transmission_params"]["noise_level"],
+                st.session_state["transmission_params"]["packet_loss"]
             )
             st.pyplot(fig)
             
@@ -213,8 +217,8 @@ if "original_audio_bytes" in st.session_state:
             - **Problem areas** indicate packet loss, noise interference, or signal degradation
             """)
 
-# 4. Evaluate Audio
-st.subheader("4. Evaluate Transmission Quality")
+# 5. Evaluate Audio
+st.subheader("5. Evaluate Transmission Quality")
 if "received_audio_bytes" in st.session_state:
     if st.button("📈 Run Evaluation"):
         with st.spinner("Evaluating audio quality..."):
