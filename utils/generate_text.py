@@ -2,12 +2,9 @@
 
 from together import Together
 import os
-from dotenv import load_dotenv
+from dotenv import load_doten
 
-# Load environment variables
-load_dotenv()
-
-def generate_text(word_count=15):
+def generate_text(word_count=15, api_key=None):
     prompt = (
         f"Generate exactly {word_count} words of realistic spoken radio transmission in a military-style satcom setting. "
         f"Use terminology like 'copy', 'over', 'grid', 'squad', 'target', 'recon', 'command', etc. "
@@ -16,7 +13,11 @@ def generate_text(word_count=15):
     )
     
     try:
-        client = Together()  # uses TOGETHER_API_KEY from env
+        # Use provided API key or fall back to environment variable
+        if api_key:
+            client = Together(api_key=api_key)
+        else:
+            client = Together()  # uses TOGETHER_API_KEY from env
         
         response = client.chat.completions.create(
             model="mistralai/Mistral-7B-Instruct-v0.3",

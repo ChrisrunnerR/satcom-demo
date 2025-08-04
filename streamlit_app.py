@@ -109,7 +109,7 @@ if st.session_state.get("show_gpt_form", False):
         with col1:
             if st.form_submit_button("Generate"):
                 with st.spinner("Generating text..."):
-                    generated_text = generate_text(word_count)
+                    generated_text = generate_text(word_count, api_key=together_api_key)
                     st.session_state["current_text"] = generated_text
                     st.session_state["show_gpt_form"] = False
                     st.rerun()
