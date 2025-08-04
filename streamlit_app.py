@@ -9,18 +9,22 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from google.cloud import texttospeech
 from dotenv import load_dotenv
+import google.auth
+from google.oauth2 import service_account
 import json
 
 # Access Together AI key
 together_api_key = st.secrets["together"]["api_key"]
 
-# Load GCP credentials
-gcp_credentials_dict = json.loads(st.secrets["gcp"]["credentials"])
+# Load credentials from secrets
+gcp_credentials = service_account.Credentials.from_service_account_info(
+    json.loads(st.secrets["gcp"]["credentials"])
+)
 
-# Write to a temporary file so Google libraries can use it
-with open("temp_gcp_credentials.json", "w") as f:
-    json.dump(gcp_credentials_dict, f)
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
+tts_client = texttospeech.TextToSpeechClient(credentials=gcp_credentials)
+
+# Inject credentials when creating the client
+client = tts_client
 
 # Load environment variables from .env file
 load_dotenv()
@@ -28,8 +32,7 @@ load_dotenv()
 from utils import generate_text, simulate_transmission, evaluate_audio
 
 # Create audio directory if it doesn't exist (for local development)
-if not st.runtime.exists():
-    os.makedirs("audio", exist_ok=True)
+os.makedirs("audio", exist_ok=True)
 
 def plot_waveform_with_analysis(original_bytes, degraded_bytes, noise_level, packet_loss):
     """Create waveform plots with highlighting for problem areas"""
@@ -161,17 +164,8 @@ if tts_button and input_text:
         audio_filename = f"tts_output_{timestamp}.wav"
         
         # Save to audio directory for local development, or use session state for cloud
-        if not st.runtime.exists():
-            # Local development - save to file
-            full_path = f"audio/{audio_filename}"
-            with open(full_path, "wb") as out:
-                out.write(response.audio_content)
-            st.session_state["original_audio_path"] = full_path
-            st.session_state["original_audio_bytes"] = response.audio_content
-        else:
-            # Streamlit Cloud - store in session state
-            st.session_state["original_audio_path"] = audio_filename
-            st.session_state["original_audio_bytes"] = response.audio_content
+        st.session_state["original_audio_path"] = audio_filename
+        st.session_state["original_audio_bytes"] = response.audio_content
 
         # Stage 5: Complete
         status_text.text("Speech generation complete!")

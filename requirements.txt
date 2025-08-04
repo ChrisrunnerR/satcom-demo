@@ -13,3 +13,4 @@ openai-whisper
 jiwer
 matplotlib
 pydub
+ffmpeg
