@@ -1,0 +1,14 @@
+python-dotenv
+streamlit
+google-cloud-texttospeech
+requests
+numpy
+scipy
+librosa
+pystoi
+pesq
+speechrecognition
+openai-whisper
+jiwer
+matplotlib
+pydub
