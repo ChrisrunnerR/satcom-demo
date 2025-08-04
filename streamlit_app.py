@@ -131,7 +131,8 @@ if tts_button and input_text:
         status_text.text("Initializing text-to-speech client...")
         progress_bar.progress(20)
         
-        client = texttospeech.TextToSpeechClient()
+        # Use the pre-configured client with credentials
+        # client = texttospeech.TextToSpeechClient()
         
         # Stage 2: Preparing text for conversion
         status_text.text("Preparing text for speech conversion...")
@@ -153,7 +154,7 @@ if tts_button and input_text:
         status_text.text("Sending text to conversion server...")
         progress_bar.progress(60)
         
-        response = client.synthesize_speech(input=synthesis_input, voice=voice, audio_config=audio_config)
+        response = tts_client.synthesize_speech(input=synthesis_input, voice=voice, audio_config=audio_config)
 
         # Stage 4: Converting speech
         status_text.text("Converting text to speech...")
