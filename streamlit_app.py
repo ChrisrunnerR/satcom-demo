@@ -192,34 +192,16 @@ if "original_audio_bytes" in st.session_state:
             )
             st.session_state["received_audio_bytes"] = transmitted_audio_bytes
             st.session_state["transmission_params"] = {"noise_level": noise_level, "packet_loss": packet_loss}
-            st.audio(transmitted_audio_bytes, format="audio/wav")
+            st.session_state["transmission_complete"] = True
 
-# 4. Waveform Analysis
-st.subheader("4. Waveform Analysis")
-if "received_audio_bytes" in st.session_state:
-    if st.button("📊 Generate Waveform Analysis"):
-        with st.spinner("Generating waveform analysis..."):
-            # Display waveform analysis
-            fig = plot_waveform_with_analysis(
-                st.session_state["original_audio_bytes"],
-                st.session_state["received_audio_bytes"],
-                st.session_state["transmission_params"]["noise_level"],
-                st.session_state["transmission_params"]["packet_loss"]
-            )
-            st.pyplot(fig)
-            
-            # Add analysis explanation
-            st.markdown("""
-            **Waveform Analysis:**
-            - **Blue line**: Original audio waveform
-            - **Red line**: Transmitted audio waveform  
-            - **Yellow highlights**: Problem areas where significant differences occur
-            - **Problem areas** indicate packet loss, noise interference, or signal degradation
-            """)
+# Display transmitted audio if available
+if "received_audio_bytes" in st.session_state and st.session_state.get("transmission_complete", False):
+    st.markdown("**🎧 Transmitted Audio:**")
+    st.audio(st.session_state["received_audio_bytes"], format="audio/wav")
 
-# 5. Evaluate Audio
-st.subheader("5. Evaluate Transmission Quality")
-if "received_audio_bytes" in st.session_state:
+# 4. Evaluate Transmission Quality
+st.subheader("4. Evaluate Transmission Quality")
+if "received_audio_bytes" in st.session_state and st.session_state.get("transmission_complete", False):
     if st.button("📈 Run Evaluation"):
         with st.spinner("Evaluating audio quality..."):
             scores = evaluate_audio(
@@ -231,6 +213,28 @@ if "received_audio_bytes" in st.session_state:
             if "error" in scores:
                 st.error(f"Evaluation failed: {scores['error']}")
             else:
+                # Display waveform analysis
+                st.markdown("### 📊 Waveform Analysis")
+                fig = plot_waveform_with_analysis(
+                    st.session_state["original_audio_bytes"],
+                    st.session_state["received_audio_bytes"],
+                    st.session_state["transmission_params"]["noise_level"],
+                    st.session_state["transmission_params"]["packet_loss"]
+                )
+                st.pyplot(fig)
+                
+                # Add analysis explanation
+                st.markdown("""
+                **Waveform Analysis:**
+                - **Blue line**: Original audio waveform
+                - **Red line**: Transmitted audio waveform  
+                - **Yellow highlights**: Problem areas where significant differences occur
+                - **Problem areas** indicate packet loss, noise interference, or signal degradation
+                """)
+                
+                st.markdown("---")
+                st.markdown("### 📋 Quality Metrics")
+                
                 # Display scores with expandable details
                 st.markdown(f"**STOI:** {scores['stoi']:.2f}")
                 with st.expander("ℹ️ STOI Details"):
