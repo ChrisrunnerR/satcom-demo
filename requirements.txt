@@ -1,6 +1,6 @@
 python-dotenv
-together
 streamlit
+together==1.5.21
 google-cloud-texttospeech
 requests
 numpy
