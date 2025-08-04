@@ -2,7 +2,6 @@
 
 from together import Together
 import os
-from dotenv import load_doten
 
 def generate_text(word_count=15, api_key=None):
     prompt = (
