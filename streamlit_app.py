@@ -9,6 +9,18 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from google.cloud import texttospeech
 from dotenv import load_dotenv
+import json
+
+# Access Together AI key
+together_api_key = st.secrets["together"]["api_key"]
+
+# Load GCP credentials
+gcp_credentials_dict = json.loads(st.secrets["gcp"]["credentials"])
+
+# Write to a temporary file so Google libraries can use it
+with open("temp_gcp_credentials.json", "w") as f:
+    json.dump(gcp_credentials_dict, f)
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
 
 # Load environment variables from .env file
 load_dotenv()
