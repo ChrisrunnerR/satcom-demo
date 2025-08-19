@@ -13,8 +13,12 @@ import google.auth
 from google.oauth2 import service_account
 import json
 
-# Access Together AI key
-together_api_key = st.secrets["together"]["api_key"]
+# Access OpenAI API key
+try:
+    openai_api_key = st.secrets["openai"]["api_key"]
+except KeyError:
+    st.error("⚠️ OpenAI API key not found in Streamlit secrets. Please configure it in your deployment settings.")
+    openai_api_key = None
 
 # Load credentials from secrets
 gcp_credentials = service_account.Credentials.from_service_account_info(
@@ -92,37 +96,64 @@ st.subheader("1. Input Text")
 if "current_text" not in st.session_state:
     st.session_state["current_text"] = "The quick brown fox jumps over the lazy dog."
 
-# Always show the text area with current text
-input_text = st.text_area("Enter your message", value=st.session_state["current_text"], height=100, key="text_input")
+# Create tabs for the two input methods
+tab1, tab2 = st.tabs(["✏️ Custom Text", "🤖 Generate with OpenAI"])
 
-# GPT generation button
-if st.button("🤖 Generate with GPT"):
-    st.session_state["show_gpt_form"] = True
+with tab1:
+    input_text = st.text_area("Enter Custom message:", value=st.session_state["current_text"], height=100, key="text_input")
+    
+    if st.button("💾 Use This Text", key="use_custom_text"):
+        st.session_state["current_text"] = input_text
+        st.success("Custom text saved!")
 
-# GPT generation form (popup-like)
-if st.session_state.get("show_gpt_form", False):
+with tab2:
+    st.markdown("**Generate realistic radio transmission text using OpenAI:**")
+
+    st.info("📊 All durations are approximate.")
+    
     with st.form("gpt_generation_form"):
-        st.markdown("### Generate Text with GPT")
-        word_count = st.number_input("Number of words", min_value=5, max_value=100, value=15, step=1)
+        # Duration inputs in two columns
+        col_duration1, col_duration2 = st.columns(2)
+        with col_duration1:
+            minutes = st.number_input("Minutes", min_value=0, max_value=10, value=0, step=1)
+        with col_duration2:
+            seconds = st.number_input("Seconds", min_value=0, max_value=59, value=10, step=1)
+        
+        # Show total duration
+        total_duration = (minutes * 60) + seconds
+        if total_duration < 5:
+            st.warning("⚠️ Total duration must be at least 5 seconds")
+            st.stop()
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.form_submit_button("Generate"):
-                with st.spinner("Generating text..."):
-                    generated_text = generate_text(word_count, api_key=together_api_key)
-                    st.session_state["current_text"] = generated_text
-                    st.session_state["show_gpt_form"] = False
-                    st.rerun()
+            if st.form_submit_button("🚀 Generate Text"):
+                if not openai_api_key:
+                    st.error("❌ OpenAI API key not configured. Please set it in your Streamlit secrets.")
+                else:
+                    with st.spinner("Generating text..."):
+                        generated_text = generate_text(minutes, seconds, api_key=openai_api_key)
+                        st.session_state["current_text"] = generated_text
+                        
+                        # Show word count and estimated duration
+                        word_count = len(generated_text.split())
+                        estimated_duration = (word_count / 120) * 60  # 120 words per minute
+                        st.success(f"AI-generated text ready! ({word_count} words, ~{estimated_duration:.1f} seconds)")
+                        st.rerun()
         with col2:
-            if st.form_submit_button("Cancel"):
-                st.session_state["show_gpt_form"] = False
+            if st.form_submit_button("❌ Cancel"):
                 st.rerun()
+
+# Display current text being used
+st.markdown("---")
+st.markdown("**📝 Current Text for Speech Generation:**")
+st.info(st.session_state["current_text"])
 
 # 2. Generate Speech with Google TTS
 st.subheader("2. Generate Speech")
 tts_button = st.button("🔊 Generate Speech")
 
-if tts_button and input_text:
+if tts_button and st.session_state["current_text"]:
     progress_bar = st.progress(0)
     status_text = st.empty()
     

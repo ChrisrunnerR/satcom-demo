@@ -1,6 +1,6 @@
 python-dotenv
 streamlit
-together==1.5.21
+openai
 google-cloud-texttospeech
 requests
 numpy
