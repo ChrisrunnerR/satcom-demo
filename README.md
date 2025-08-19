@@ -29,5 +29,8 @@ streamlit run streamlit_app.py
 
 - Generate text using OpenAI (GPT-4o-mini) or input custom text
 - Convert text to speech using Google TTS
-- Simulate satellite communication transmission with configurable noise and packet loss
+- Simulate satellite communication transmission with configurable:
+  - **Noise**: Gaussian noise injection
+  - **Packet Loss**: Random audio segment dropping
+  - **Compression Artifacts**: Bandwidth limitation, quantization, harmonic distortion, and temporal smearing
 - Evaluate audio quality using STOI, PESQ, and WER metrics

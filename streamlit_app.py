@@ -38,7 +38,7 @@ from utils import generate_text, simulate_transmission, evaluate_audio
 # Create audio directory if it doesn't exist (for local development)
 os.makedirs("audio", exist_ok=True)
 
-def plot_waveform_with_analysis(original_bytes, degraded_bytes, noise_level, packet_loss):
+def plot_waveform_with_analysis(original_bytes, degraded_bytes, noise_level, packet_loss, compression_level):
     """Create waveform plots with highlighting for problem areas"""
     import librosa
     
@@ -76,7 +76,7 @@ def plot_waveform_with_analysis(original_bytes, degraded_bytes, noise_level, pac
         ax2.fill_between(time, -1, 1, where=significant_diff, 
                         alpha=0.3, color='yellow', label='Problem Areas')
     
-    ax2.set_title(f'Transmitted Audio Waveform (Noise: {noise_level:.2f}, Packet Loss: {packet_loss}%)', 
+    ax2.set_title(f'Transmitted Audio Waveform (Noise: {noise_level:.2f}, Packet Loss: {packet_loss}%, Compression: {compression_level:.1f})', 
                   fontsize=14, fontweight='bold')
     ax2.set_xlabel('Time (seconds)')
     ax2.set_ylabel('Amplitude')
@@ -211,18 +211,40 @@ if tts_button and st.session_state["current_text"]:
         progress_bar.progress(0)
         st.error(f"Failed to generate speech: {str(e)}")
 
-# 3. Simulate Transmission
+# 3. Simulate Satcom Transmission
 st.subheader("3. Simulate Satcom Transmission")
 if "original_audio_bytes" in st.session_state:
-    noise_level = st.slider("Noise Level", 0.0, 1.0, 0.1, step=0.05)
-    packet_loss = st.slider("Packet Loss %", 0, 50, 10, step=5)
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        noise_level = st.slider("Noise Level", 0.0, 1.0, 0.1, step=0.05)
+    with col2:
+        packet_loss = st.slider("Packet Loss %", 0, 50, 10, step=5)
+    with col3:
+        compression_level = st.slider("Compression Level", 0.0, 1.0, 0.5, step=0.1, 
+                                    help="Simulates satcom audio compression artifacts (robotic, metallic voice quality)")
+    
+    # Add information about compression effects
+    with st.expander("ℹ️ About Compression Artifacts"):
+        st.markdown("""
+        **Satcom Audio Compression Effects:**
+        
+        - **Bandwidth Limitation**: Audio is filtered to 300Hz-3kHz (typical satcom range)
+        - **Quantization**: Reduced bit depth simulates low bitrate compression
+        - **Harmonic Distortion**: Creates metallic/robotic voice quality
+        - **Temporal Smearing**: Compression artifacts that blur speech timing
+        - **Frequency Domain Compression**: Reduces dynamic range like real codecs
+        
+        Higher compression levels create more realistic satcom audio characteristics.
+        """)
+    
     if st.button("🚀 Transmit Audio"):
         with st.spinner("Simulating satcom transmission..."):
             transmitted_audio_bytes = simulate_transmission(
-                st.session_state["original_audio_bytes"], noise_level, packet_loss
+                st.session_state["original_audio_bytes"], noise_level, packet_loss, compression_level
             )
             st.session_state["received_audio_bytes"] = transmitted_audio_bytes
-            st.session_state["transmission_params"] = {"noise_level": noise_level, "packet_loss": packet_loss}
+            st.session_state["transmission_params"] = {"noise_level": noise_level, "packet_loss": packet_loss, "compression_level": compression_level}
             st.session_state["transmission_complete"] = True
 
 # Display transmitted audio if available
@@ -250,7 +272,8 @@ if "received_audio_bytes" in st.session_state and st.session_state.get("transmis
                     st.session_state["original_audio_bytes"],
                     st.session_state["received_audio_bytes"],
                     st.session_state["transmission_params"]["noise_level"],
-                    st.session_state["transmission_params"]["packet_loss"]
+                    st.session_state["transmission_params"]["packet_loss"],
+                    st.session_state["transmission_params"]["compression_level"]
                 )
                 st.pyplot(fig)
                 

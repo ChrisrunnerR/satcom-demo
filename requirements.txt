@@ -6,6 +6,7 @@ requests
 numpy
 scipy
 librosa
+soundfile
 pystoi
 pesq
 speechrecognition
