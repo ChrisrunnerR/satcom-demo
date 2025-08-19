@@ -266,89 +266,102 @@ if "received_audio_bytes" in st.session_state and st.session_state.get("transmis
             if "error" in scores:
                 st.error(f"Evaluation failed: {scores['error']}")
             else:
-                # Display waveform analysis
-                st.markdown("### 📊 Waveform Analysis")
-                fig = plot_waveform_with_analysis(
-                    st.session_state["original_audio_bytes"],
-                    st.session_state["received_audio_bytes"],
-                    st.session_state["transmission_params"]["noise_level"],
-                    st.session_state["transmission_params"]["packet_loss"],
-                    st.session_state["transmission_params"]["compression_level"]
-                )
-                st.pyplot(fig)
+                # Display pass/fail result first based on STOI threshold
+                stoi_score = scores['stoi']
+                stoi_threshold = 0.5
                 
-                # Add analysis explanation
-                st.markdown("""
-                **Waveform Analysis:**
-                - **Blue line**: Original audio waveform
-                - **Red line**: Transmitted audio waveform  
-                - **Yellow highlights**: Problem areas where significant differences occur
-                - **Problem areas** indicate packet loss, noise interference, or signal degradation
-                """)
-                
-                st.markdown("---")
-                st.markdown("### 📋 Quality Metrics")
-                
-                # Display scores with expandable details
-                st.markdown(f"**STOI:** {scores['stoi']:.2f}")
-                with st.expander("ℹ️ STOI Details"):
-                    st.markdown("""
-                    **STOI (Short-Time Objective Intelligibility)**
-                    
-                    **Definition:** Measures speech intelligibility by evaluating correlation between clean and processed speech spectral envelopes.
-                    
-                    **Range:** 0 to 1 (higher is better)
-                    - 0.9-1.0: Excellent intelligibility
-                    - 0.7-0.9: Good intelligibility  
-                    - 0.5-0.7: Moderate intelligibility
-                    - 0.0-0.5: Poor intelligibility
-                    
-                    **Your Score:** {:.2f} - {}
-                    """.format(scores['stoi'], 
-                              "Excellent" if scores['stoi'] >= 0.9 else "Good" if scores['stoi'] >= 0.7 else "Moderate" if scores['stoi'] >= 0.5 else "Poor"))
-                
-                st.markdown(f"**PESQ:** {scores['pesq']:.2f}")
-                with st.expander("ℹ️ PESQ Details"):
-                    st.markdown("""
-                    **PESQ (Perceptual Evaluation of Speech Quality)**
-                    
-                    **Definition:** Assesses subjective speech quality accounting for distortion, noise, and perceptual differences.
-                    
-                    **Range:** -0.5 to 4.5 (higher is better)
-                    - 4.0-4.5: Excellent quality
-                    - 3.0-4.0: Good quality
-                    - 2.0-3.0: Moderate quality
-                    - 0.0-2.0: Poor quality
-                    
-                    **Your Score:** {:.2f} - {}
-                    """.format(scores['pesq'],
-                              "Excellent" if scores['pesq'] >= 4.0 else "Good" if scores['pesq'] >= 3.0 else "Moderate" if scores['pesq'] >= 2.0 else "Poor"))
-                
-                st.markdown(f"**WER:** {scores['wer']:.2f}")
-                with st.expander("ℹ️ WER Details"):
-                    st.markdown("""
-                    **WER (Word Error Rate)**
-                    
-                    **Definition:** Measures ASR accuracy by calculating error rate in transcribed words.
-                    
-                    **Formula:** (Insertions + Deletions + Substitutions) / Total Words
-                    
-                    **Range:** 0 to 1 (lower is better)
-                    - 0.0-0.05: Excellent transcription
-                    - 0.05-0.10: Good transcription
-                    - 0.10-0.20: Moderate transcription
-                    - 0.20-1.0: Poor transcription
-                    
-                    **Your Score:** {:.2f} ({:.0%}) - {}
-                    """.format(scores['wer'], scores['wer'],
-                              "Excellent" if scores['wer'] <= 0.05 else "Good" if scores['wer'] <= 0.10 else "Moderate" if scores['wer'] <= 0.20 else "Poor"))
-                
-                # Overall summary
-                st.markdown("---")
-                st.markdown("**📋 Summary:**")
-                if scores['stoi'] < 0.5 and scores['pesq'] < 2.0:
-                    st.warning("Low speech quality detected.")
-                elif scores['wer'] < 0.1:
-                    st.success("Good transcription accuracy despite quality issues.")
+                if stoi_score >= stoi_threshold:
+                    st.success("✅ **TRANSMISSION TEST PASSED**")
+                    st.info(f"STOI Score: {stoi_score:.3f} (Threshold: {stoi_threshold}) - Speech intelligibility is acceptable for satcom operations.")
                 else:
-                    st.info("Mixed results - check individual metrics for details.")
+                    st.error("❌ **TRANSMISSION TEST FAILED**")
+                    st.warning(f"STOI Score: {stoi_score:.3f} (Threshold: {stoi_threshold}) - Speech intelligibility is below acceptable levels for satcom operations.")
+                
+                # Add expandable details section
+                with st.expander("📊 View Detailed Analysis & Waveforms", expanded=False):
+                    # Display waveform analysis
+                    st.markdown("### 📊 Waveform Analysis")
+                    fig = plot_waveform_with_analysis(
+                        st.session_state["original_audio_bytes"],
+                        st.session_state["received_audio_bytes"],
+                        st.session_state["transmission_params"]["noise_level"],
+                        st.session_state["transmission_params"]["packet_loss"],
+                        st.session_state["transmission_params"]["compression_level"]
+                    )
+                    st.pyplot(fig)
+                    
+                    # Add analysis explanation
+                    st.markdown("""
+                    **Waveform Analysis:**
+                    - **Blue line**: Original audio waveform
+                    - **Red line**: Transmitted audio waveform  
+                    - **Yellow highlights**: Problem areas where significant differences occur
+                    - **Problem areas** indicate packet loss, noise interference, or signal degradation
+                    """)
+                    
+                    st.markdown("---")
+                    st.markdown("### 📋 Quality Metrics")
+                    
+                    # Display scores with expandable details
+                    st.markdown(f"**STOI:** {scores['stoi']:.3f}")
+                    with st.expander("ℹ️ STOI Details"):
+                        st.markdown("""
+                        **STOI (Short-Time Objective Intelligibility)**
+                        
+                        **Definition:** Measures speech intelligibility by evaluating correlation between clean and processed speech spectral envelopes.
+                        
+                        **Range:** 0 to 1 (higher is better)
+                        - 0.9-1.0: Excellent intelligibility
+                        - 0.7-0.9: Good intelligibility  
+                        - 0.5-0.7: Moderate intelligibility
+                        - 0.0-0.5: Poor intelligibility
+                        
+                        **Your Score:** {:.3f} - {}
+                        """.format(scores['stoi'], 
+                                  "Excellent" if scores['stoi'] >= 0.9 else "Good" if scores['stoi'] >= 0.7 else "Moderate" if scores['stoi'] >= 0.5 else "Poor"))
+                    
+                    st.markdown(f"**PESQ:** {scores['pesq']:.3f}")
+                    with st.expander("ℹ️ PESQ Details"):
+                        st.markdown("""
+                        **PESQ (Perceptual Evaluation of Speech Quality)**
+                        
+                        **Definition:** Assesses subjective speech quality accounting for distortion, noise, and perceptual differences.
+                        
+                        **Range:** -0.5 to 4.5 (higher is better)
+                        - 4.0-4.5: Excellent quality
+                        - 3.0-4.0: Good quality
+                        - 2.0-3.0: Moderate quality
+                        - 0.0-2.0: Poor quality
+                        
+                        **Your Score:** {:.3f} - {}
+                        """.format(scores['pesq'],
+                                  "Excellent" if scores['pesq'] >= 4.0 else "Good" if scores['pesq'] >= 3.0 else "Moderate" if scores['pesq'] >= 2.0 else "Poor"))
+                    
+                    st.markdown(f"**WER:** {scores['wer']:.3f}")
+                    with st.expander("ℹ️ WER Details"):
+                        st.markdown("""
+                        **WER (Word Error Rate)**
+                        
+                        **Definition:** Measures ASR accuracy by calculating error rate in transcribed words.
+                        
+                        **Formula:** (Insertions + Deletions + Substitutions) / Total Words
+                        
+                        **Range:** 0 to 1 (lower is better)
+                        - 0.0-0.05: Excellent transcription
+                        - 0.05-0.10: Good transcription
+                        - 0.10-0.20: Moderate transcription
+                        - 0.20-1.0: Poor transcription
+                        
+                        **Your Score:** {:.3f} ({:.1%}) - {}
+                        """.format(scores['wer'], scores['wer'],
+                                  "Excellent" if scores['wer'] <= 0.05 else "Good" if scores['wer'] <= 0.10 else "Moderate" if scores['wer'] <= 0.20 else "Poor"))
+                    
+                    # Overall summary
+                    st.markdown("---")
+                    st.markdown("**📋 Summary:**")
+                    if scores['stoi'] < 0.5 and scores['pesq'] < 2.0:
+                        st.warning("Low speech quality detected.")
+                    elif scores['wer'] < 0.1:
+                        st.success("Good transcription accuracy despite quality issues.")
+                    else:
+                        st.info("Mixed results - check individual metrics for details.")
