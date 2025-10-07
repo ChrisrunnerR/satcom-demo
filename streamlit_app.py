@@ -302,7 +302,7 @@ if "received_audio_bytes" in st.session_state and st.session_state.get("transmis
                     st.markdown("---")
                     st.markdown("### 📋 Quality Metrics")
                     
-                    # Display scores with expandable details
+                    # Display STOI score with expandable details
                     st.markdown(f"**STOI:** {scores['stoi']:.3f}")
                     with st.expander("ℹ️ STOI Details"):
                         st.markdown("""
@@ -320,48 +320,64 @@ if "received_audio_bytes" in st.session_state and st.session_state.get("transmis
                         """.format(scores['stoi'], 
                                   "Excellent" if scores['stoi'] >= 0.9 else "Good" if scores['stoi'] >= 0.7 else "Moderate" if scores['stoi'] >= 0.5 else "Poor"))
                     
-                    st.markdown(f"**PESQ:** {scores['pesq']:.3f}")
-                    with st.expander("ℹ️ PESQ Details"):
+                    # Display additional waveform analysis metrics
+                    st.markdown(f"**SNR:** {scores['snr_db']:.1f} dB")
+                    with st.expander("ℹ️ SNR Details"):
                         st.markdown("""
-                        **PESQ (Perceptual Evaluation of Speech Quality)**
+                        **SNR (Signal-to-Noise Ratio)**
                         
-                        **Definition:** Assesses subjective speech quality accounting for distortion, noise, and perceptual differences.
+                        **Definition:** Measures the ratio of signal power to noise power in decibels.
                         
-                        **Range:** -0.5 to 4.5 (higher is better)
-                        - 4.0-4.5: Excellent quality
-                        - 3.0-4.0: Good quality
-                        - 2.0-3.0: Moderate quality
-                        - 0.0-2.0: Poor quality
+                        **Range:** -∞ to +∞ dB (higher is better)
+                        - >20 dB: Excellent signal quality
+                        - 10-20 dB: Good signal quality
+                        - 0-10 dB: Moderate signal quality
+                        - <0 dB: Poor signal quality (noise dominates)
+                        
+                        **Your Score:** {:.1f} dB - {}
+                        """.format(scores['snr_db'],
+                                  "Excellent" if scores['snr_db'] >= 20 else "Good" if scores['snr_db'] >= 10 else "Moderate" if scores['snr_db'] >= 0 else "Poor"))
+                    
+                    st.markdown(f"**RMSE:** {scores['rmse']:.4f}")
+                    with st.expander("ℹ️ RMSE Details"):
+                        st.markdown("""
+                        **RMSE (Root Mean Square Error)**
+                        
+                        **Definition:** Measures the average magnitude of differences between original and degraded audio.
+                        
+                        **Range:** 0 to 1+ (lower is better)
+                        - <0.01: Excellent similarity
+                        - 0.01-0.05: Good similarity
+                        - 0.05-0.1: Moderate similarity
+                        - >0.1: Poor similarity
+                        
+                        **Your Score:** {:.4f} - {}
+                        """.format(scores['rmse'],
+                                  "Excellent" if scores['rmse'] < 0.01 else "Good" if scores['rmse'] < 0.05 else "Moderate" if scores['rmse'] < 0.1 else "Poor"))
+                    
+                    st.markdown(f"**Correlation:** {scores['correlation']:.3f}")
+                    with st.expander("ℹ️ Correlation Details"):
+                        st.markdown("""
+                        **Correlation Coefficient**
+                        
+                        **Definition:** Measures linear relationship between original and degraded audio waveforms.
+                        
+                        **Range:** -1 to 1 (closer to 1 is better)
+                        - 0.9-1.0: Excellent correlation
+                        - 0.7-0.9: Good correlation
+                        - 0.5-0.7: Moderate correlation
+                        - <0.5: Poor correlation
                         
                         **Your Score:** {:.3f} - {}
-                        """.format(scores['pesq'],
-                                  "Excellent" if scores['pesq'] >= 4.0 else "Good" if scores['pesq'] >= 3.0 else "Moderate" if scores['pesq'] >= 2.0 else "Poor"))
-                    
-                    st.markdown(f"**WER:** {scores['wer']:.3f}")
-                    with st.expander("ℹ️ WER Details"):
-                        st.markdown("""
-                        **WER (Word Error Rate)**
-                        
-                        **Definition:** Measures ASR accuracy by calculating error rate in transcribed words.
-                        
-                        **Formula:** (Insertions + Deletions + Substitutions) / Total Words
-                        
-                        **Range:** 0 to 1 (lower is better)
-                        - 0.0-0.05: Excellent transcription
-                        - 0.05-0.10: Good transcription
-                        - 0.10-0.20: Moderate transcription
-                        - 0.20-1.0: Poor transcription
-                        
-                        **Your Score:** {:.3f} ({:.1%}) - {}
-                        """.format(scores['wer'], scores['wer'],
-                                  "Excellent" if scores['wer'] <= 0.05 else "Good" if scores['wer'] <= 0.10 else "Moderate" if scores['wer'] <= 0.20 else "Poor"))
+                        """.format(scores['correlation'],
+                                  "Excellent" if scores['correlation'] >= 0.9 else "Good" if scores['correlation'] >= 0.7 else "Moderate" if scores['correlation'] >= 0.5 else "Poor"))
                     
                     # Overall summary
                     st.markdown("---")
                     st.markdown("**📋 Summary:**")
-                    if scores['stoi'] < 0.5 and scores['pesq'] < 2.0:
-                        st.warning("Low speech quality detected.")
-                    elif scores['wer'] < 0.1:
-                        st.success("Good transcription accuracy despite quality issues.")
+                    if scores['stoi'] < 0.5:
+                        st.warning("Low speech intelligibility detected - transmission may be difficult to understand.")
+                    elif scores['stoi'] >= 0.7:
+                        st.success("Good speech intelligibility - transmission should be clear and understandable.")
                     else:
-                        st.info("Mixed results - check individual metrics for details.")
+                        st.info("Moderate speech intelligibility - transmission may have some clarity issues.")
