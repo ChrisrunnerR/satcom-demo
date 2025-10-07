@@ -169,7 +169,7 @@ if tts_button and st.session_state["current_text"]:
         status_text.text("Preparing text for speech conversion...")
         progress_bar.progress(40)
 
-        synthesis_input = texttospeech.SynthesisInput(text=input_text)
+        synthesis_input = texttospeech.SynthesisInput(text=st.session_state["current_text"])
 
         voice = texttospeech.VoiceSelectionParams(
             language_code="en-US",
