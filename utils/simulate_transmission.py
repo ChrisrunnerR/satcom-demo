@@ -17,6 +17,15 @@ def simulate_transmission(audio_path_or_bytes, noise_level=0.1, packet_loss=10, 
     - Gaussian noise injection
     - Compression/vocoder artifacts (robotic, metallic voice quality)
     """
+    # If no degradation is requested, return the original audio unchanged
+    if noise_level == 0 and packet_loss == 0 and compression_level == 0:
+        if isinstance(audio_path_or_bytes, bytes):
+            return audio_path_or_bytes
+        else:
+            # If it's a file path, read and return the bytes
+            with open(audio_path_or_bytes, 'rb') as f:
+                return f.read()
+    
     try:
         # Handle both file paths and audio bytes
         if isinstance(audio_path_or_bytes, str) and os.path.exists(audio_path_or_bytes):

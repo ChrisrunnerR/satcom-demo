@@ -53,22 +53,15 @@ def evaluate_audio(original_audio, degraded_audio, sr=16000):
         if min_length < 100:  # Less than ~6ms at 16kHz
             return {"error": "Audio too short for analysis (less than 6ms)"}
         
+        # Check if audio is identical (within floating point precision)
+        max_diff = np.max(np.abs(y_ref - y_deg))
+        if max_diff < 1e-10:  # Essentially identical
+            return {
+                "stoi": 1.0
+            }
+        
         # Calculate STOI score
         stoi_score = stoi(y_ref, y_deg, sr, extended=False)
-        
-        # Calculate waveform analysis metrics
-        # Signal-to-noise ratio estimation
-        signal_power = np.mean(y_ref ** 2)
-        noise_power = np.mean((y_ref - y_deg) ** 2)
-        snr_db = 10 * np.log10(signal_power / (noise_power + 1e-10))
-        
-        # Root mean square error
-        rmse = np.sqrt(np.mean((y_ref - y_deg) ** 2))
-        
-        # Correlation coefficient
-        correlation = np.corrcoef(y_ref, y_deg)[0, 1]
-        if np.isnan(correlation):
-            correlation = 0.0
             
     except Exception as e:
         return {"error": f"Metric calculation failed: {str(e)}"}
@@ -109,10 +102,5 @@ def evaluate_audio(original_audio, degraded_audio, sr=16000):
     #     wer_score = 1.0  # Default to worst case if transcription fails
 
     return {
-        "stoi": stoi_score,
-        "snr_db": snr_db,
-        "rmse": rmse,
-        "correlation": correlation,
-        # "pesq": pesq_score,  # Commented out as requested
-        # "wer": wer_score     # Commented out as requested
+        "stoi": stoi_score
     }

@@ -320,62 +320,12 @@ if "received_audio_bytes" in st.session_state and st.session_state.get("transmis
                         """.format(scores['stoi'], 
                                   "Excellent" if scores['stoi'] >= 0.9 else "Good" if scores['stoi'] >= 0.7 else "Moderate" if scores['stoi'] >= 0.5 else "Poor"))
                     
-                    # Display additional waveform analysis metrics
-                    st.markdown(f"**SNR:** {scores['snr_db']:.1f} dB")
-                    with st.expander("ℹ️ SNR Details"):
-                        st.markdown("""
-                        **SNR (Signal-to-Noise Ratio)**
-                        
-                        **Definition:** Measures the ratio of signal power to noise power in decibels.
-                        
-                        **Range:** -∞ to +∞ dB (higher is better)
-                        - >20 dB: Excellent signal quality
-                        - 10-20 dB: Good signal quality
-                        - 0-10 dB: Moderate signal quality
-                        - <0 dB: Poor signal quality (noise dominates)
-                        
-                        **Your Score:** {:.1f} dB - {}
-                        """.format(scores['snr_db'],
-                                  "Excellent" if scores['snr_db'] >= 20 else "Good" if scores['snr_db'] >= 10 else "Moderate" if scores['snr_db'] >= 0 else "Poor"))
-                    
-                    st.markdown(f"**RMSE:** {scores['rmse']:.4f}")
-                    with st.expander("ℹ️ RMSE Details"):
-                        st.markdown("""
-                        **RMSE (Root Mean Square Error)**
-                        
-                        **Definition:** Measures the average magnitude of differences between original and degraded audio.
-                        
-                        **Range:** 0 to 1+ (lower is better)
-                        - <0.01: Excellent similarity
-                        - 0.01-0.05: Good similarity
-                        - 0.05-0.1: Moderate similarity
-                        - >0.1: Poor similarity
-                        
-                        **Your Score:** {:.4f} - {}
-                        """.format(scores['rmse'],
-                                  "Excellent" if scores['rmse'] < 0.01 else "Good" if scores['rmse'] < 0.05 else "Moderate" if scores['rmse'] < 0.1 else "Poor"))
-                    
-                    st.markdown(f"**Correlation:** {scores['correlation']:.3f}")
-                    with st.expander("ℹ️ Correlation Details"):
-                        st.markdown("""
-                        **Correlation Coefficient**
-                        
-                        **Definition:** Measures linear relationship between original and degraded audio waveforms.
-                        
-                        **Range:** -1 to 1 (closer to 1 is better)
-                        - 0.9-1.0: Excellent correlation
-                        - 0.7-0.9: Good correlation
-                        - 0.5-0.7: Moderate correlation
-                        - <0.5: Poor correlation
-                        
-                        **Your Score:** {:.3f} - {}
-                        """.format(scores['correlation'],
-                                  "Excellent" if scores['correlation'] >= 0.9 else "Good" if scores['correlation'] >= 0.7 else "Moderate" if scores['correlation'] >= 0.5 else "Poor"))
-                    
                     # Overall summary
                     st.markdown("---")
                     st.markdown("**📋 Summary:**")
-                    if scores['stoi'] < 0.5:
+                    if scores['stoi'] == 1.0:
+                        st.success("🎉 **PERFECT TRANSMISSION** - Audio is identical to original with no degradation detected!")
+                    elif scores['stoi'] < 0.5:
                         st.warning("Low speech intelligibility detected - transmission may be difficult to understand.")
                     elif scores['stoi'] >= 0.7:
                         st.success("Good speech intelligibility - transmission should be clear and understandable.")
