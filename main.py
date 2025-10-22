@@ -10,6 +10,10 @@ from datetime import datetime
 from google.cloud import texttospeech
 from google.oauth2 import service_account
 import json
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from utils import generate_text, simulate_transmission, evaluate_audio
 
