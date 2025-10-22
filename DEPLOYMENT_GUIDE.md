@@ -13,6 +13,7 @@ This guide walks you through deploying the FastAPI backend to DigitalOcean with 
 1. **Log into DigitalOcean**: https://cloud.digitalocean.com
 
 2. **Create a new Droplet**:
+
    - Click "Create" → "Droplets"
    - **Image**: Ubuntu 22.04 LTS
    - **Plan**: Basic ($6/month - 1GB RAM, 1 vCPU)
@@ -28,6 +29,7 @@ This guide walks you through deploying the FastAPI backend to DigitalOcean with 
 ## 🔑 Step 2: Set Up SSH Key (if not done)
 
 ### On Mac/Linux:
+
 ```bash
 # Generate SSH key if you don't have one
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
@@ -37,6 +39,7 @@ cat ~/.ssh/id_rsa.pub
 ```
 
 ### Add to DigitalOcean:
+
 1. Go to Settings → Security → SSH Keys
 2. Click "Add SSH Key"
 3. Paste your public key
@@ -45,11 +48,13 @@ cat ~/.ssh/id_rsa.pub
 ## 🛠️ Step 3: Initial Server Setup
 
 SSH into your droplet:
+
 ```bash
 ssh root@YOUR_DROPLET_IP
 ```
 
 Run setup commands:
+
 ```bash
 # Update system
 apt update && apt upgrade -y
@@ -76,6 +81,7 @@ nano .env
 ```
 
 Paste your environment variables:
+
 ```bash
 OPENAI_API_KEY=sk-proj-your-key-here
 GCP_CREDENTIALS='{"type":"service_account","project_id":"satcom-proj",...}'
@@ -90,16 +96,19 @@ Save and exit (Ctrl+X, Y, Enter)
 2. Add these secrets:
 
    **DROPLET_IP**
+
    ```
    YOUR_DROPLET_IP_ADDRESS
    ```
 
    **DROPLET_USER**
+
    ```
    root
    ```
 
    **DROPLET_SSH_KEY**
+
    ```
    (Paste your PRIVATE SSH key - contents of ~/.ssh/id_rsa)
    ```
@@ -107,19 +116,23 @@ Save and exit (Ctrl+X, Y, Enter)
 ## 🎯 Step 5: Deploy!
 
 ### Manual First Deploy:
+
 SSH into droplet and run:
+
 ```bash
 cd /home/satcom-demo
 docker-compose up -d --build
 ```
 
 ### Check if it's running:
+
 ```bash
 docker ps
 curl http://localhost:8000/health
 ```
 
 ### Access your API:
+
 ```
 http://YOUR_DROPLET_IP:8000
 ```
@@ -127,6 +140,7 @@ http://YOUR_DROPLET_IP:8000
 ## 🔄 Step 6: Automatic Deployment
 
 Now whenever you push to `main` branch:
+
 ```bash
 git add .
 git commit -m "Update code"
@@ -134,6 +148,7 @@ git push origin main
 ```
 
 GitHub Actions will automatically:
+
 1. Connect to your droplet
 2. Pull latest code
 3. Rebuild Docker container
@@ -142,11 +157,13 @@ GitHub Actions will automatically:
 ## 📊 Step 7: Test Your API
 
 ### Health Check:
+
 ```bash
 curl http://YOUR_DROPLET_IP:8000/health
 ```
 
 ### Generate Text:
+
 ```bash
 curl -X POST http://YOUR_DROPLET_IP:8000/api/generate-text \
   -H "Content-Type: application/json" \
@@ -154,7 +171,9 @@ curl -X POST http://YOUR_DROPLET_IP:8000/api/generate-text \
 ```
 
 ### View API Docs:
+
 Open in browser:
+
 ```
 http://YOUR_DROPLET_IP:8000/docs
 ```
@@ -164,10 +183,12 @@ http://YOUR_DROPLET_IP:8000/docs
 1. **Buy a domain** (e.g., namecheap.com, godaddy.com)
 
 2. **Point domain to droplet IP**:
+
    - Add an A record: `@` → `YOUR_DROPLET_IP`
    - Add an A record: `api` → `YOUR_DROPLET_IP`
 
 3. **Install Nginx & SSL**:
+
 ```bash
 apt install nginx certbot python3-certbot-nginx -y
 
@@ -176,6 +197,7 @@ nano /etc/nginx/sites-available/satcom-demo
 ```
 
 Paste:
+
 ```nginx
 server {
     listen 80;
@@ -190,6 +212,7 @@ server {
 ```
 
 Enable and get SSL:
+
 ```bash
 ln -s /etc/nginx/sites-available/satcom-demo /etc/nginx/sites-enabled/
 nginx -t
@@ -198,6 +221,7 @@ certbot --nginx -d YOUR_DOMAIN.com -d api.YOUR_DOMAIN.com
 ```
 
 Now access via HTTPS:
+
 ```
 https://api.YOUR_DOMAIN.com
 ```
@@ -205,22 +229,26 @@ https://api.YOUR_DOMAIN.com
 ## 🐛 Troubleshooting
 
 ### Check logs:
+
 ```bash
 docker-compose logs -f
 ```
 
 ### Restart container:
+
 ```bash
 docker-compose restart
 ```
 
 ### Rebuild from scratch:
+
 ```bash
 docker-compose down
 docker-compose up -d --build
 ```
 
 ### Check if port is open:
+
 ```bash
 netstat -tulpn | grep 8000
 ```
@@ -253,13 +281,14 @@ cd /home/satcom-demo && git pull origin main && docker-compose up -d --build
 ## ✅ You're Done!
 
 Your API is now:
+
 - ✅ Running on DigitalOcean
 - ✅ Auto-deploying from GitHub
 - ✅ Accessible via HTTP
 - ✅ Ready for client demo
 
 Share this URL with your client:
+
 ```
 http://YOUR_DROPLET_IP:8000/docs
 ```
-
