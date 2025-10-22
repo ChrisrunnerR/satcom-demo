@@ -4,26 +4,53 @@ A Streamlit application that demonstrates satellite communication audio transmis
 
 ## Setup
 
-### 1. Install Dependencies
+### 1. Create and Activate Virtual Environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On macOS/Linux
+# OR
+venv\Scripts\activate  # On Windows
+```
+
+### 2. Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Environment Variables
-Create a `.env` file in the root directory with the following variables:
+### 3. Configure API Keys
 
+Edit the `.streamlit/secrets.toml` file and add your API keys:
+
+**Required:**
+
+- OpenAI API Key: Get from https://platform.openai.com/api-keys
+- Google Cloud TTS credentials: Get from https://console.cloud.google.com/apis/credentials
+
+The file structure:
+
+```toml
+[openai]
+api_key = "your-openai-api-key-here"
+
+[gcp]
+credentials = '''
+{
+  "type": "service_account",
+  "project_id": "your-project-id",
+  ...
+}
+'''
 ```
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key_here
 
-# Google Cloud Configuration (if needed for TTS)
-GOOGLE_APPLICATION_CREDENTIALS=path_to_your_google_credentials.json
-```
+### 4. Run the Application
 
-### 3. Run the Application
 ```bash
 streamlit run streamlit_app.py
 ```
+
+**Note:** Make sure your virtual environment is activated before running the app!
 
 ## Features
 
