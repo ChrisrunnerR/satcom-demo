@@ -1,0 +1,26 @@
+# Production Requirements - Optimized for DigitalOcean App Platform
+# Excludes heavy ML packages (Whisper, PyTorch) to reduce build size and memory
+
+# Core FastAPI
+python-dotenv
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# APIs
+openai
+google-cloud-texttospeech
+requests
+
+# Audio Processing (Essential)
+numpy
+scipy
+librosa
+soundfile
+pystoi
+pesq
+pydub
+
+# Utilities
+matplotlib
+

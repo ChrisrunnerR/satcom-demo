@@ -1,7 +1,6 @@
 # utils/evaluate_audio.py
 
 import warnings
-import whisper
 from pystoi import stoi
 # from pesq import pesq  # Commented out as requested
 # from jiwer import wer  # Commented out as requested
@@ -11,11 +10,17 @@ import tempfile
 import os
 import numpy as np
 
-# Suppress PyTorch warnings
-warnings.filterwarnings("ignore", category=UserWarning, module="torch")
-
-# Load Whisper model once to avoid repeated load latency
-model = whisper.load_model("base")
+# Try to import Whisper (optional for production)
+try:
+    import whisper
+    # Suppress PyTorch warnings
+    warnings.filterwarnings("ignore", category=UserWarning, module="torch")
+    # Load Whisper model once to avoid repeated load latency
+    model = whisper.load_model("base")
+    WHISPER_AVAILABLE = True
+except ImportError:
+    WHISPER_AVAILABLE = False
+    model = None
 
 def evaluate_audio(original_audio, degraded_audio, sr=16000):
     """
