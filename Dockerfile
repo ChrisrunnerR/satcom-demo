@@ -18,12 +18,6 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install FastAPI specific dependencies
-RUN pip install --no-cache-dir \
-    fastapi==0.115.6 \
-    uvicorn[standard]==0.34.0 \
-    python-multipart==0.0.20
-
 # Copy application code
 COPY . .
 
