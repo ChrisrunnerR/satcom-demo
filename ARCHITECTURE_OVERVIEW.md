@@ -13,6 +13,7 @@ You now have **TWO DIFFERENT APPS** in this project:
 **Purpose:** Interactive demo for humans to click around
 
 **What it does:**
+
 - Pretty web interface
 - Generate text button
 - Convert to speech button
@@ -21,9 +22,11 @@ You now have **TWO DIFFERENT APPS** in this project:
 - **Good for:** Demos, presentations, manual testing
 
 **How to run locally:**
+
 ```bash
 streamlit run streamlit_app.py
 ```
+
 Opens in browser at: http://localhost:8501
 
 **Deployment:** Streamlit Cloud (FREE) - see `START_HERE.md`
@@ -37,6 +40,7 @@ Opens in browser at: http://localhost:8501
 **Purpose:** Programmatic access for other apps/systems
 
 **What it does:**
+
 - Provides API endpoints (URLs that return data)
 - No buttons or UI - just sends/receives JSON
 - Can be called from ANY programming language
@@ -44,9 +48,11 @@ Opens in browser at: http://localhost:8501
 - **Good for:** Production apps, mobile apps, integrations
 
 **How to run locally:**
+
 ```bash
 python main.py
 ```
+
 API available at: http://localhost:8000  
 Interactive docs at: http://localhost:8000/docs
 
@@ -56,22 +62,23 @@ Interactive docs at: http://localhost:8000/docs
 
 ## 📊 **Side-by-Side Comparison**
 
-| Feature | Streamlit App | FastAPI Backend |
-|---------|--------------|-----------------|
-| **File** | `streamlit_app.py` | `main.py` |
-| **Type** | Web UI | REST API |
-| **For** | Humans | Programs/Apps |
-| **Has buttons?** | ✅ Yes | ❌ No |
-| **Has API endpoints?** | ❌ No | ✅ Yes |
-| **Deploy to** | Streamlit Cloud (FREE) | DigitalOcean ($6/mo) |
-| **Use case** | Demo, presentation | Production, integration |
-| **Local URL** | http://localhost:8501 | http://localhost:8000 |
+| Feature                | Streamlit App          | FastAPI Backend         |
+| ---------------------- | ---------------------- | ----------------------- |
+| **File**               | `streamlit_app.py`     | `main.py`               |
+| **Type**               | Web UI                 | REST API                |
+| **For**                | Humans                 | Programs/Apps           |
+| **Has buttons?**       | ✅ Yes                 | ❌ No                   |
+| **Has API endpoints?** | ❌ No                  | ✅ Yes                  |
+| **Deploy to**          | Streamlit Cloud (FREE) | DigitalOcean ($6/mo)    |
+| **Use case**           | Demo, presentation     | Production, integration |
+| **Local URL**          | http://localhost:8501  | http://localhost:8000   |
 
 ---
 
 ## 🔑 **Key Concept: "Local Demo" vs "Deployed"**
 
 ### **"Local Demo"** = Running on YOUR computer
+
 - Only YOU can access it
 - Free
 - Stops when you close terminal
@@ -86,6 +93,7 @@ python main.py
 ```
 
 ### **"Deployed"** = Running on a server in the cloud
+
 - ANYONE can access it via URL
 - Costs money (or free tier)
 - Runs 24/7 even when your computer is off
@@ -101,7 +109,9 @@ FastAPI → Deploy to DigitalOcean ($6/mo with $200 credit)
 ## 🎯 **What We Built Today**
 
 ### ✅ **We Created:**
+
 1. **FastAPI Backend** (`main.py`)
+
    - REST API with all satcom features
    - 8 API endpoints
    - Docker setup
@@ -109,6 +119,7 @@ FastAPI → Deploy to DigitalOcean ($6/mo with $200 credit)
    - **Status:** ✅ Running locally at http://localhost:8000
 
 2. **Deployment Configuration**
+
    - `Dockerfile` - Containerize the app
    - `docker-compose.yml` - Easy deployment
    - `.github/workflows/deploy.yml` - Auto-deploy on git push
@@ -120,6 +131,7 @@ FastAPI → Deploy to DigitalOcean ($6/mo with $200 credit)
    - **Status:** ✅ Complete
 
 ### 🔄 **We Did NOT Change:**
+
 - Original Streamlit app (`streamlit_app.py`) still works!
 - Can still deploy to Streamlit Cloud
 - See `START_HERE.md` for Streamlit deployment
@@ -131,12 +143,14 @@ FastAPI → Deploy to DigitalOcean ($6/mo with $200 credit)
 When you run `python main.py`, you get these API endpoints:
 
 ### **Basic Endpoints:**
+
 ```
 GET  /              → API info and status
 GET  /health        → Health check
 ```
 
 ### **Feature Endpoints:**
+
 ```
 POST /api/generate-text          → OpenAI text generation
 POST /api/generate-speech        → Google TTS (text→audio)
@@ -148,6 +162,7 @@ POST /api/full-pipeline          → Complete end-to-end
 ### **How to Use:**
 
 **Example 1: Generate Text**
+
 ```bash
 curl -X POST http://localhost:8000/api/generate-text \
   -H "Content-Type: application/json" \
@@ -163,12 +178,14 @@ Just open in browser: http://localhost:8000/docs
 ## 🤷 **Which One Should You Use?**
 
 ### **Use Streamlit App when:**
+
 - Demoing to non-technical people
 - Quick manual testing
 - Presentations
 - You want a pretty UI
 
 ### **Use FastAPI Backend when:**
+
 - Building a mobile app
 - Integrating with other systems
 - Need API access
@@ -180,6 +197,7 @@ Just open in browser: http://localhost:8000/docs
 ## 🚀 **Deployment Paths**
 
 ### **Path 1: Deploy Streamlit (Easiest)**
+
 ```
 Follow: START_HERE.md
 Time: 15 minutes
@@ -188,6 +206,7 @@ Result: https://your-app.streamlit.app
 ```
 
 ### **Path 2: Deploy FastAPI (What your EL wants)**
+
 ```
 Follow: DIGITALOCEAN_QUICKSTART.md
 Time: 15 minutes
@@ -196,6 +215,7 @@ Result: http://YOUR_DROPLET_IP:8000
 ```
 
 ### **Path 3: Deploy Both! (Recommended)**
+
 ```
 1. Deploy Streamlit to Streamlit Cloud (FREE UI)
 2. Deploy FastAPI to DigitalOcean ($6/mo API)
@@ -208,9 +228,11 @@ Result: Best of both worlds!
 ## 📝 **What Your EL Asked For**
 
 Your EL said:
+
 > "Spin up a FastAPI server on DigitalOcean with GitHub Actions auto-deploy"
 
 **What we built:** ✅
+
 - ✅ FastAPI server (`main.py`)
 - ✅ Docker configuration
 - ✅ GitHub Actions workflow
@@ -222,6 +244,7 @@ Your EL said:
 ## 🎬 **Current Status**
 
 ### **What's Running Right Now:**
+
 ```
 ✅ FastAPI Server: http://localhost:8000
    - Running on your Mac
@@ -243,9 +266,11 @@ Your EL said:
 ## 🎯 **TL;DR - Simple Explanation**
 
 **Original Project:**
+
 - Had a Streamlit app with a UI
 
 **What We Added Today:**
+
 - Built a FastAPI backend (REST API version)
 - No UI, just API endpoints
 - Can call it from code
@@ -253,6 +278,7 @@ Your EL said:
 - 90% configured DigitalOcean
 
 **Both apps do the same thing, just different interfaces:**
+
 - Streamlit = For humans (buttons, UI)
 - FastAPI = For programs (JSON, API)
 
@@ -277,4 +303,3 @@ Your EL said:
 ---
 
 **Questions? Check http://localhost:8000/docs to see your API in action!**
-

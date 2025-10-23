@@ -1,0 +1,22 @@
+/Users/admin/Desktop/satcom-demo/venv/lib/python3.12/site-packages/pydub/utils.py:170: RuntimeWarning: Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work
+  warn("Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work", RuntimeWarning)
+INFO:     Started server process [57306]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:55136 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55149 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55201 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55201 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55041 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55176 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55180 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55184 - "POST /api/generate-text HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55201 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55201 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55204 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55204 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55215 - "POST /api/generate-speech HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55874 - "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55875 - "GET /apple-touch-icon.png HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55876 - "GET /favicon.ico HTTP/1.1" 404 Not Found

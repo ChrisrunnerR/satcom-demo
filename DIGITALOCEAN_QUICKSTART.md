@@ -5,7 +5,7 @@
 ### Step 1: Create DigitalOcean Account (2 min)
 
 1. Go to: https://www.digitalocean.com
-2. Click "Sign Up" 
+2. Click "Sign Up"
 3. Use your email or GitHub account
 4. Add a payment method (they give you $200 free credit for 60 days!)
 
@@ -16,10 +16,9 @@
 2. **Choose Configuration:**
    - **Region**: Pick closest to you (e.g., San Francisco, New York)
    - **Image**: Ubuntu 22.04 LTS
-   - **Size**: 
+   - **Size**:
      - Click "Basic" plan
      - Choose **$6/month** (1GB RAM, 1 vCPU, 25GB SSD)
-   
 3. **Authentication**:
    - **Option A (Recommended)**: SSH Key
      - Run this on your Mac: `cat ~/.ssh/id_rsa.pub`
@@ -28,7 +27,6 @@
      - Paste your key
      - Name it "My Mac"
    - **Option B**: Password (simpler but less secure)
-   
 4. **Hostname**: `satcom-api`
 
 5. **Click "Create Droplet"** (wait ~1 minute)
@@ -81,8 +79,9 @@ GCP_CREDENTIALS={"type":"service_account","project_id":"satcom-proj",...}
 ```
 
 Press:
+
 - `Ctrl+X`
-- `Y` 
+- `Y`
 - `Enter`
 
 ### Step 6: Start Your API! (1 min)
@@ -104,11 +103,13 @@ You should see: `{"status":"healthy"}`
 ### Step 8: Access From Anywhere
 
 Your API is now live at:
+
 ```
 http://YOUR_DROPLET_IP:8000
 ```
 
 **Interactive Docs:**
+
 ```
 http://YOUR_DROPLET_IP:8000/docs
 ```
@@ -133,15 +134,18 @@ Share this URL with your client!
 
    **Name:** `DROPLET_SSH_KEY`
    **Value:** Your private SSH key
+
    ```bash
    # Get your private key:
    cat ~/.ssh/id_rsa
    ```
+
    Copy the ENTIRE output including `-----BEGIN` and `-----END` lines
 
 3. **Test Auto-Deploy:**
 
    Make any change to your code, then:
+
    ```bash
    git add .
    git commit -m "Test auto-deploy"
@@ -155,6 +159,7 @@ Share this URL with your client!
 ## 🐛 Troubleshooting
 
 ### Check if server is running:
+
 ```bash
 ssh root@YOUR_DROPLET_IP
 cd /home/satcom-demo
@@ -162,22 +167,26 @@ docker-compose ps
 ```
 
 ### View logs:
+
 ```bash
 docker-compose logs -f
 ```
 
 ### Restart server:
+
 ```bash
 docker-compose restart
 ```
 
 ### Rebuild from scratch:
+
 ```bash
 docker-compose down
 docker-compose up -d --build
 ```
 
 ### Check firewall:
+
 ```bash
 ufw status
 # If active and blocking port 8000:
@@ -197,12 +206,14 @@ ufw allow 8000
 ## ✅ You're Done!
 
 Your API is:
+
 - ✅ Running on DigitalOcean
 - ✅ Accessible from anywhere
 - ✅ Auto-deploying from GitHub (if you set it up)
 - ✅ Ready for client demo
 
 **Share this with your client:**
+
 ```
 http://YOUR_DROPLET_IP:8000/docs
 ```
@@ -219,4 +230,3 @@ They can test all the endpoints right in their browser!
 4. **Monitor usage** (optional): Set up logging
 
 For now, you have a working demo API! 🚀
-
