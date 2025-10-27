@@ -298,6 +298,236 @@ async def api_full_pipeline(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Pipeline execution failed: {str(e)}")
 
+# =============================================================================
+# TWILIO VOICE INTEGRATION - Ground Station VOIP Calls
+# =============================================================================
+
+try:
+    from utils.twilio_handler import twilio_handler
+    TWILIO_AVAILABLE = True
+except ImportError:
+    TWILIO_AVAILABLE = False
+    print("Warning: Twilio integration not available")
+
+# Pydantic models for Twilio endpoints
+class MakeCallRequest(BaseModel):
+    to_number: str
+    callback_url: Optional[str] = None
+
+class SendTextRequest(BaseModel):
+    call_sid: Optional[str] = None
+    text: str
+    voice: str = "Polly.Matthew"
+
+class SendAudioRequest(BaseModel):
+    call_sid: Optional[str] = None
+    audio_url: str
+
+# Twilio Voice Endpoints
+@app.post("/api/call/make")
+async def make_outgoing_call(request: MakeCallRequest):
+    """
+    Make outgoing call to Air Side
+    
+    Example:
+    ```json
+    {
+        "to_number": "+14155551234",
+        "callback_url": "https://your-app.ondigitalocean.app"
+    }
+    ```
+    """
+    if not TWILIO_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Twilio integration not configured")
+    
+    # Use app URL as callback if not provided
+    callback_url = request.callback_url or str(os.getenv("APP_URL", "http://localhost:8000"))
+    
+    result = twilio_handler.make_call(request.to_number, callback_url)
+    
+    if "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+    
+    return result
+
+@app.post("/api/call/answer")
+async def answer_incoming_call(
+    CallSid: str = Form(...),
+    From: str = Form(...),
+    To: str = Form(...)
+):
+    """
+    Webhook endpoint - Called by Twilio when incoming call received
+    Returns TwiML to control call behavior
+    
+    This is called automatically by Twilio - not for manual use
+    """
+    if not TWILIO_AVAILABLE:
+        return "<Response><Say>Service unavailable</Say><Hangup/></Response>"
+    
+    request_data = {
+        "CallSid": CallSid,
+        "From": From,
+        "To": To
+    }
+    
+    twiml = twilio_handler.answer_incoming_call(request_data)
+    
+    return StreamingResponse(
+        io.BytesIO(twiml.encode()),
+        media_type="application/xml"
+    )
+
+@app.post("/api/call/send-audio")
+async def send_audio_during_call(request: SendAudioRequest):
+    """
+    Send audio file to active call
+    
+    Args:
+        audio_url: Publicly accessible URL of audio file
+        call_sid: Optional - uses active call if not specified
+    
+    Example:
+    ```json
+    {
+        "audio_url": "https://your-server.com/audio/transmission.mp3"
+    }
+    ```
+    """
+    if not TWILIO_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Twilio integration not configured")
+    
+    call_sid = request.call_sid or twilio_handler.active_call_sid
+    
+    if not call_sid:
+        raise HTTPException(status_code=400, detail="No active call")
+    
+    result = twilio_handler.send_audio_to_call(call_sid, request.audio_url)
+    
+    if "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+    
+    return result
+
+@app.post("/api/call/send-text")
+async def send_text_during_call(request: SendTextRequest):
+    """
+    Send text as speech to active call using Twilio TTS
+    
+    Args:
+        text: Text to speak
+        voice: Twilio voice (default: Polly.Matthew)
+        call_sid: Optional - uses active call if not specified
+    
+    Example:
+    ```json
+    {
+        "text": "Alpha squad, this is ground control. Transmission received, over."
+    }
+    ```
+    """
+    if not TWILIO_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Twilio integration not configured")
+    
+    call_sid = request.call_sid or twilio_handler.active_call_sid
+    
+    if not call_sid:
+        raise HTTPException(status_code=400, detail="No active call")
+    
+    result = twilio_handler.send_text_to_call(call_sid, request.text, request.voice)
+    
+    if "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+    
+    return result
+
+@app.post("/api/call/hangup")
+async def hangup_call(call_sid: Optional[str] = None):
+    """
+    End active call
+    
+    Args:
+        call_sid: Optional - uses active call if not specified
+    
+    Example:
+    ```json
+    {}
+    ```
+    Or:
+    ```json
+    {
+        "call_sid": "CA123456789"
+    }
+    ```
+    """
+    if not TWILIO_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Twilio integration not configured")
+    
+    result = twilio_handler.hangup_call(call_sid)
+    
+    if "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+    
+    return result
+
+@app.get("/api/call/status")
+async def get_call_status(call_sid: Optional[str] = None):
+    """
+    Get status of current or specific call
+    
+    Args:
+        call_sid: Optional - uses active call if not specified
+    
+    Returns call status, duration, participants, etc.
+    """
+    if not TWILIO_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Twilio integration not configured")
+    
+    result = twilio_handler.get_call_status(call_sid)
+    
+    return result
+
+@app.get("/api/call/recordings/{call_sid}")
+async def get_call_recordings(call_sid: str):
+    """
+    Get all recordings from a completed call
+    
+    Args:
+        call_sid: Call SID to get recordings for
+    
+    Returns list of recording URLs
+    """
+    if not TWILIO_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Twilio integration not configured")
+    
+    result = twilio_handler.get_call_recordings(call_sid)
+    
+    if "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+    
+    return result
+
+@app.post("/api/call/recording-callback")
+async def recording_callback(
+    RecordingSid: str = Form(...),
+    RecordingUrl: str = Form(...),
+    CallSid: str = Form(...)
+):
+    """
+    Webhook - Twilio calls this when recording is available
+    Automatically called by Twilio - not for manual use
+    """
+    # Store recording URL
+    if TWILIO_AVAILABLE:
+        twilio_handler.recorded_audio_urls.append({
+            "recording_sid": RecordingSid,
+            "recording_url": RecordingUrl,
+            "call_sid": CallSid,
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    return {"status": "recording_received"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

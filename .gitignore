@@ -1,6 +1,7 @@
 # .gitignore
 .env
 .streamlit/secrets.toml
+.twilio-credentials.txt
 audio/
 
 # Python
