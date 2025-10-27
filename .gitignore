@@ -3,6 +3,7 @@
 .streamlit/secrets.toml
 .twilio-credentials.txt
 audio/
+*.log
 
 # Python
 __pycache__/
