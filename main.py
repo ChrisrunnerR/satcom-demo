@@ -321,7 +321,7 @@ class SendTextRequest(BaseModel):
 
 class SendAudioRequest(BaseModel):
     call_sid: Optional[str] = None
-    audio_url: str = "https://demo.twilio.com/welcome/audio"
+    audio_url: str = "http://com.twilio.sounds.music.s3.amazonaws.com/ClockworkWaltz.mp3"
 
 # Twilio Voice Endpoints
 @app.post("/api/call/make")
