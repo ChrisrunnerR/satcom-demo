@@ -27,6 +27,7 @@ class TwilioCallHandler:
         self.active_call_sid = None
         self.call_status = "idle"  # idle, ringing, active, ended
         self.recorded_audio_urls = []
+        self.pending_audio_url = None  # For dynamic audio playback
     
     def make_call(self, to_number: str, callback_url: str) -> Dict:
         """
@@ -68,7 +69,7 @@ class TwilioCallHandler:
     def answer_incoming_call(self, request_data: Dict) -> str:
         """
         Generate TwiML response for incoming call
-        Sets up call to record audio and accept commands
+        Simple approach - just greet and hold the line
         
         Returns:
             TwiML XML string
@@ -81,15 +82,10 @@ class TwilioCallHandler:
         self.call_status = "active"
         
         # Play welcome message
-        response.say("Ground station connected. Call established. Awaiting transmission.", voice='Polly.Matthew')
+        response.say("Ground station connected. Call established.", voice='Polly.Matthew')
         
-        # Pause for 5 minutes to keep call alive and allow API control
-        # This allows time to send audio/text via API
-        response.pause(length=300)
-        
-        # After pause, say goodbye and end
-        response.say("No transmission received. Disconnecting.", voice='Polly.Matthew')
-        response.hangup()
+        # Just pause briefly - this allows API to take control
+        response.pause(length=60)
         
         return str(response)
     
@@ -108,9 +104,13 @@ class TwilioCallHandler:
             return {"error": "Twilio client not initialized"}
         
         try:
-            # Update call to play audio
+            # Store audio URL for dynamic TwiML generation
+            self.pending_audio_url = audio_url
+            
+            # Redirect call to fetch new TwiML with audio
             call = self.client.calls(call_sid).update(
-                twiml=f'<Response><Play>{audio_url}</Play></Response>'
+                url=f"{os.getenv('APP_URL', 'https://satcom-project-eqqi5.ondigitalocean.app')}/api/call/play-audio",
+                method="POST"
             )
             
             return {

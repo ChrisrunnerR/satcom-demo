@@ -393,6 +393,33 @@ async def answer_incoming_call(
         media_type="application/xml"
     )
 
+@app.post("/api/call/play-audio")
+async def play_audio_callback():
+    """
+    Callback endpoint for playing audio during active call
+    Returns TwiML to play audio file
+    """
+    if not TWILIO_AVAILABLE:
+        return StreamingResponse(
+            io.BytesIO(b'<Response><Say>Service unavailable</Say><Hangup/></Response>'),
+            media_type="application/xml"
+        )
+    
+    # Get the pending audio URL from the handler
+    audio_url = twilio_handler.pending_audio_url or "https://demo.twilio.com/welcome/audio"
+    
+    # Generate TwiML to play audio and keep call alive
+    twiml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Play>{audio_url}</Play>
+    <Pause length="60"/>
+</Response>'''
+    
+    return StreamingResponse(
+        io.BytesIO(twiml.encode()),
+        media_type="application/xml"
+    )
+
 @app.post("/api/call/send-audio")
 async def send_audio_during_call(request: SendAudioRequest):
     """
