@@ -327,15 +327,17 @@ class SendAudioRequest(BaseModel):
 @app.post("/api/call/make")
 async def make_outgoing_call(request: MakeCallRequest):
     """
-    Make outgoing call to Air Side
+    Make outgoing call to Air Side (Satellite)
     
     Example:
     ```json
     {
-        "to_number": "+14155551234",
-        "callback_url": "https://your-app.ondigitalocean.app"
+        "to_number": "+19788384309",
+        "callback_url": "https://satcom-project-eqqi5.ondigitalocean.app"
     }
     ```
+    
+    This will call from Ground Control (+1-415-299-7283) to Satellite (+1-978-838-4309)
     """
     if not TWILIO_AVAILABLE:
         raise HTTPException(status_code=503, detail="Twilio integration not configured")
