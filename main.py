@@ -317,7 +317,7 @@ class MakeCallRequest(BaseModel):
 class SendTextRequest(BaseModel):
     call_sid: Optional[str] = None
     text: str
-    voice: str = "Polly.Matthew"
+    voice: str = "Polly.Joanna"
 
 class SendAudioRequest(BaseModel):
     call_sid: Optional[str] = None

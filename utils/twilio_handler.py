@@ -81,9 +81,11 @@ class TwilioCallHandler:
         self.active_call_sid = call_sid
         self.call_status = "active"
         
-        # Play welcome message then hold
-        response.say("Ground station connected. Call established. Standing by.", voice='Polly.Matthew')
-        response.say(".", voice='Polly.Matthew', loop=100)  # Keeps call alive quietly
+        # Play welcome message ONCE
+        response.say("Ground station connected. Call established. Standing by.", voice='Polly.Joanna')
+        
+        # Keep call alive for 1 hour with silence
+        response.pause(length=3600)
         
         return str(response)
     
