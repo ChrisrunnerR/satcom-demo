@@ -84,8 +84,8 @@ class TwilioCallHandler:
         # Play welcome message
         response.say("Ground station connected. Call established.", voice='Polly.Matthew')
         
-        # Just pause briefly - this allows API to take control
-        response.pause(length=60)
+        # Say something slowly to keep call alive (Say can be interrupted!)
+        response.say("Standing by for transmission." * 20, voice='Polly.Matthew')
         
         return str(response)
     
