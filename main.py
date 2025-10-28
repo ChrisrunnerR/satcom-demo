@@ -354,15 +354,28 @@ async def make_outgoing_call(request: MakeCallRequest):
 
 @app.post("/api/call/answer")
 async def answer_incoming_call(
-    CallSid: str = Form(...),
-    From: str = Form(...),
-    To: str = Form(...)
+    CallSid: str = Form("CA1234567890abcdef1234567890abcdef"),
+    From: str = Form("+14152997283"),
+    To: str = Form("+19788384309")
 ):
     """
     Webhook endpoint - Called by Twilio when incoming call received
     Returns TwiML to control call behavior
     
-    This is called automatically by Twilio - not for manual use
+    ⚠️ NOTE: This is automatically called by Twilio when someone calls +1-978-838-4309
+    You don't need to call this manually - it's already working!
+    
+    When you called +1-978-838-4309 and heard "Ground station connected" - THIS endpoint handled it!
+    
+    Default values shown are examples for testing only.
+    
+    Example call flow:
+    1. Someone dials +1-978-838-4309
+    2. Twilio automatically POSTs here with:
+       - CallSid: Unique call identifier (auto-generated)
+       - From: Caller's phone number (e.g., +14152997283)
+       - To: Your Twilio number (+19788384309)
+    3. This endpoint returns TwiML telling Twilio what to say/do
     """
     if not TWILIO_AVAILABLE:
         return "<Response><Say>Service unavailable</Say><Hangup/></Response>"
