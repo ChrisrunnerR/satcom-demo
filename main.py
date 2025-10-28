@@ -416,17 +416,28 @@ async def send_text_during_call(request: SendTextRequest):
     """
     Send text as speech to active call using Twilio TTS
     
-    Args:
-        text: Text to speak
-        voice: Twilio voice (default: Polly.Matthew)
-        call_sid: Optional - uses active call if not specified
+    Note: call_sid is automatically used from the most recent active call if not provided
     
     Example:
     ```json
     {
-        "text": "Alpha squad, this is ground control. Transmission received, over."
+        "text": "Ground Control to Satellite, do you copy?",
+        "voice": "Polly.Matthew"
     }
     ```
+    
+    Or with specific call:
+    ```json
+    {
+        "call_sid": "CA17e4ba4400a0df3dc14888fa9b007896",
+        "text": "Mission accomplished, returning to base"
+    }
+    ```
+    
+    Args:
+        text: Text to speak
+        voice: Twilio voice (default: Polly.Matthew)
+        call_sid: Optional - uses active call if not specified
     """
     if not TWILIO_AVAILABLE:
         raise HTTPException(status_code=503, detail="Twilio integration not configured")
@@ -446,21 +457,24 @@ async def send_text_during_call(request: SendTextRequest):
 @app.post("/api/call/hangup")
 async def hangup_call(call_sid: Optional[str] = None):
     """
-    End active call
+    End active call (terminates immediately)
     
-    Args:
-        call_sid: Optional - uses active call if not specified
+    Note: If no call_sid provided, hangs up the most recent active call
     
-    Example:
+    Example - Hang up active call:
     ```json
     {}
     ```
-    Or:
+    
+    Example - Hang up specific call:
     ```json
     {
-        "call_sid": "CA123456789"
+        "call_sid": "CA17e4ba4400a0df3dc14888fa9b007896"
     }
     ```
+    
+    Args:
+        call_sid: Optional - uses active call if not specified
     """
     if not TWILIO_AVAILABLE:
         raise HTTPException(status_code=503, detail="Twilio integration not configured")
