@@ -82,10 +82,14 @@ class TwilioCallHandler:
         self.call_status = "active"
         
         # Play welcome message
-        response.say("Ground station connected. Call established.", voice='Polly.Matthew')
+        response.say("Ground station connected. Call established. Standing by.", voice='Polly.Matthew')
         
-        # Say something slowly to keep call alive (Say can be interrupted!)
-        response.say("Standing by for transmission." * 20, voice='Polly.Matthew')
+        # Start recording to keep call alive - Record can be interrupted by updates
+        response.record(
+            max_length=3600,
+            play_beep=False,
+            recording_status_callback="/api/call/recording-callback"
+        )
         
         return str(response)
     
