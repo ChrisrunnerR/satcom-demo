@@ -321,7 +321,7 @@ class SendTextRequest(BaseModel):
 
 class SendAudioRequest(BaseModel):
     call_sid: Optional[str] = None
-    audio_url: str
+    audio_url: str = "https://demo.twilio.com/welcome/audio"
 
 # Twilio Voice Endpoints
 @app.post("/api/call/make")
@@ -396,18 +396,38 @@ async def answer_incoming_call(
 @app.post("/api/call/send-audio")
 async def send_audio_during_call(request: SendAudioRequest):
     """
-    Send audio file to active call
+    Play audio file during an active call
     
-    Args:
-        audio_url: Publicly accessible URL of audio file
-        call_sid: Optional - uses active call if not specified
+    ⚠️ REQUIREMENTS:
+    - Must have an active call in progress
+    - Audio file must be publicly accessible (HTTPS URL)
+    - Supported formats: MP3, WAV
     
-    Example:
+    Default audio URL plays Twilio's demo welcome message.
+    
+    Example - Use default audio:
+    ```json
+    {}
+    ```
+    
+    Example - Custom audio:
     ```json
     {
         "audio_url": "https://your-server.com/audio/transmission.mp3"
     }
     ```
+    
+    Example - With specific call:
+    ```json
+    {
+        "call_sid": "CA17e4ba4400a0df3dc14888fa9b007896",
+        "audio_url": "https://demo.twilio.com/welcome/audio"
+    }
+    ```
+    
+    Args:
+        audio_url: Publicly accessible URL of audio file (default: Twilio demo)
+        call_sid: Optional - uses active call if not specified
     """
     if not TWILIO_AVAILABLE:
         raise HTTPException(status_code=503, detail="Twilio integration not configured")
