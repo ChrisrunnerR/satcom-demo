@@ -81,25 +81,15 @@ class TwilioCallHandler:
         self.call_status = "active"
         
         # Play welcome message
-        response.say("Ground station connected. Call established.", voice='Polly.Matthew')
+        response.say("Ground station connected. Call established. Awaiting transmission.", voice='Polly.Matthew')
         
-        # Start recording the call
-        response.record(
-            max_length=3600,  # 1 hour max
-            transcribe=False,  # We'll use our own STT
-            recording_status_callback="/api/call/recording-callback"
-        )
+        # Pause for 5 minutes to keep call alive and allow API control
+        # This allows time to send audio/text via API
+        response.pause(length=300)
         
-        # Keep call alive - gather DTMF input or wait
-        gather = Gather(
-            num_digits=1,
-            action="/api/call/gather-callback",
-            timeout=30
-        )
-        response.append(gather)
-        
-        # If no input, loop back
-        response.redirect("/api/call/answer")
+        # After pause, say goodbye and end
+        response.say("No transmission received. Disconnecting.", voice='Polly.Matthew')
+        response.hangup()
         
         return str(response)
     
