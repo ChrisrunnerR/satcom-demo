@@ -219,12 +219,12 @@ class TwilioCallHandler:
             return {
                 "call_sid": call.sid,
                 "status": call.status,
-                "direction": call.direction,
-                "from": call.from_,
-                "to": call.to,
-                "duration": call.duration,
-                "start_time": str(call.start_time),
-                "end_time": str(call.end_time)
+                "direction": getattr(call, 'direction', 'unknown'),
+                "from": getattr(call, 'from_', 'unknown'),
+                "to": getattr(call, 'to', 'unknown'),
+                "duration": getattr(call, 'duration', '0'),
+                "start_time": str(getattr(call, 'start_time', 'N/A')),
+                "end_time": str(getattr(call, 'end_time', 'N/A'))
             }
         except Exception as e:
             return {"error": f"Failed to get call status: {str(e)}"}
