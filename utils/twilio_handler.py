@@ -91,7 +91,7 @@ class TwilioCallHandler:
     
     def send_audio_to_call(self, call_sid: str, audio_url: str) -> Dict:
         """
-        Send audio to active call
+        Send audio to active call (same method as send-text)
         
         Args:
             call_sid: Active call SID
@@ -104,13 +104,9 @@ class TwilioCallHandler:
             return {"error": "Twilio client not initialized"}
         
         try:
-            # Store audio URL for dynamic TwiML generation
-            self.pending_audio_url = audio_url
-            
-            # Redirect call to fetch new TwiML with audio
+            # Update call to play audio (same way send-text works)
             call = self.client.calls(call_sid).update(
-                url=f"{os.getenv('APP_URL', 'https://satcom-project-eqqi5.ondigitalocean.app')}/api/call/play-audio",
-                method="POST"
+                twiml=f'<Response><Play>{audio_url}</Play></Response>'
             )
             
             return {
