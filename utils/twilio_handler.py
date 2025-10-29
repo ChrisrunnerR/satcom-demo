@@ -69,7 +69,7 @@ class TwilioCallHandler:
     def answer_incoming_call(self, request_data: Dict) -> str:
         """
         Generate TwiML response for incoming call
-        Simple approach - just greet and hold the line
+        Records the call and keeps it alive for API control
         
         Returns:
             TwiML XML string
@@ -84,8 +84,12 @@ class TwilioCallHandler:
         # Play welcome message ONCE
         response.say("Ground station connected. Call established. Standing by.", voice='Polly.Joanna')
         
-        # Keep call alive for 1 hour with silence
-        response.pause(length=3600)
+        # Start recording the call
+        response.record(
+            max_length=3600,  # 1 hour max
+            transcribe=False,
+            recording_status_callback="/api/call/recording-callback"
+        )
         
         return str(response)
     
