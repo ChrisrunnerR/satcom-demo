@@ -252,6 +252,43 @@ class TwilioCallHandler:
             }
         except Exception as e:
             return {"error": f"Failed to get recordings: {str(e)}"}
+    
+    def download_recording(self, recording_sid: str):
+        """
+        Download recording MP3 using Twilio credentials
+        Returns raw MP3 bytes for streaming
+        
+        Args:
+            recording_sid: Recording SID (e.g., RE6fcbf2cdb13956ba3691a8f266d694f4)
+        
+        Returns:
+            MP3 file bytes
+        """
+        if not self.client:
+            return None
+        
+        try:
+            import requests
+            from requests.auth import HTTPBasicAuth
+            
+            # Construct the MP3 URL
+            mp3_url = f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Recordings/{recording_sid}.mp3"
+            
+            # Download using Twilio credentials
+            response = requests.get(
+                mp3_url,
+                auth=HTTPBasicAuth(self.account_sid, self.auth_token),
+                stream=True
+            )
+            
+            if response.status_code == 200:
+                return response.content
+            else:
+                return None
+                
+        except Exception as e:
+            print(f"Failed to download recording: {str(e)}")
+            return None
 
 # Global instance
 twilio_handler = TwilioCallHandler()

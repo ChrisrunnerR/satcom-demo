@@ -571,7 +571,7 @@ async def get_call_recordings(call_sid: str):
     Args:
         call_sid: Call SID to get recordings for
     
-    Returns list of recording URLs
+    Returns list of recording URLs and direct download links
     """
     if not TWILIO_AVAILABLE:
         raise HTTPException(status_code=503, detail="Twilio integration not configured")
@@ -581,7 +581,45 @@ async def get_call_recordings(call_sid: str):
     if "error" in result:
         raise HTTPException(status_code=500, detail=result["error"])
     
+    # Add direct download URLs from our API (no auth needed!)
+    for recording in result.get("recordings", []):
+        recording["download_url"] = f"/api/call/recordings/{call_sid}/download/{recording['sid']}"
+    
     return result
+
+@app.get("/api/call/recordings/{call_sid}/download/{recording_sid}")
+async def download_recording(call_sid: str, recording_sid: str):
+    """
+    Download recording MP3 directly (NO AUTHENTICATION REQUIRED!)
+    
+    Just click the link and the MP3 downloads instantly!
+    
+    Args:
+        call_sid: Call SID
+        recording_sid: Recording SID (e.g., RE6fcbf2cdb13956ba3691a8f266d694f4)
+    
+    Returns MP3 file for direct download
+    
+    Example:
+        GET /api/call/recordings/CAd78288c84a58004a9721f4ef51ad71d3/download/RE6fcbf2cdb13956ba3691a8f266d694f4
+    """
+    if not TWILIO_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Twilio integration not configured")
+    
+    # Download from Twilio using our credentials
+    mp3_bytes = twilio_handler.download_recording(recording_sid)
+    
+    if not mp3_bytes:
+        raise HTTPException(status_code=404, detail="Recording not found or failed to download")
+    
+    # Return MP3 file for download
+    return StreamingResponse(
+        io.BytesIO(mp3_bytes),
+        media_type="audio/mpeg",
+        headers={
+            "Content-Disposition": f"attachment; filename=recording_{recording_sid}.mp3"
+        }
+    )
 
 @app.post("/api/call/recording-callback")
 async def recording_callback(
